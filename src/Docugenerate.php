@@ -7,6 +7,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Stream;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Classe permettant de générer un document sur l'API docugenerate.
@@ -14,34 +16,48 @@ use Illuminate\Support\Facades\Http;
 class Docugenerate
 {
     private string $apiKey;
+    private string $apiVerion = "v1";
     private string $templateId;
     private array $data;
-    private ?string $documentName;
-    private ?string  $outputName;
-    private ?string  $output_format;
+    //private ?string $documentName;
+    private ?string  $outputName = null;
+    private ?string  $outputFormat = ".pdf";
     private bool $singleFile = true;
     private bool $pageBreak = true;
-
 
     /**
      * Construction du client
      */
-    public function __construct(string $apiKey, string $templateId)
+    public function __construct(string $apiKey, string $templateId = null)
     {
         $this->apiKey = $apiKey;
         $this->templateId = $templateId;
     }
 
+    public function getTags(){
+        if( !$this->templateId ) throw new \Exception("Vous devez spécifier l'id du Template Docugenerate pour pouvoir récupérer ses champs.");
+        $client = new Client();
+        $headers = [
+            'Authorization' => $this->apiKey
+        ];
+        //$client->header('Authorization : ' . $this->apiKey);
+        $request = new Request('GET', 'https://api.docugenerate.com/'.$this->apiVerion.'/template/' . $this->templateId, $headers);
+        $res = $client->sendAsync($request)->wait();
+        return json_decode( $res->getBody(), true )['tags']['valid'];
+    }
+
     /**
-     * Associaation des données permettant de générer mon doc prérempplies.
+     * Association des données permettant de générer mon doc prérempplies.
+     * Possibilité de l'appeler autant de fois que l'on souhaite de doc pré-remplis
      *
      * @param array $data
      * @return $this
      */
-    public function data(array $data){
-        $this->data($data);
+    public function addData(array $data){
+        $this->data[] = $data;
         return $this;
     }
+
 
     /**
      * Génération du document
@@ -49,40 +65,67 @@ class Docugenerate
      * @param string $name
      * @return DocugenerateResponsePostDocument
      */
-    public function generate( string $name = "" ){
+    public function generate( string $name = null ){
 
-
+        $this->outputName = $name;
         $client = new Client();
         $headers = [
-            'Authorization' => '69c3ed719089f1c33af8d43b4deb133a'
+            'Authorization' => $this->apiKey
         ];
         $options = [
             'multipart' => [
                 [
                     'name' => 'template_id',
-                    'contents' => '4VCizRDagJE13PxNfA9m'
+                    'contents' => $this->templateId
                 ],
                 [
                     'name' => 'data',
-                    'contents' => '[{ "non_client": "John", "non_prenom": "Doe" ,"date_naissance_client":"17/03/1981","ville_naissance_soussigne":"Angers","ville_client":"Le Relecq Kerhuon"}]'
-                ],
-                [
-                    'name' => 'name',
-                    'contents' => 'testPydViaPostman'
+                    'contents' => json_encode($this->data)
                 ],
                 [
                     'name' => 'output_format',
-                    'contents' => '.pdf'
+                    'contents' => $this->outputFormat
                 ]
-            ]];
-            $request = new Request('POST', 'https://api.docugenerate.com/v1/document', $headers);
-            $res = $client->sendAsync($request, $options)->wait();
-            return new DocugenerateResponsePostDocument( $res->getBody() );
+            ]
+        ];
+        if( $this->outputName ){
+            $options = [
+                'multipart' => [
+                    [
+                        'name' => 'output_name',
+                        'contents' => $this->outputName
+                    ]
+                ]
+            ];
+        }
+
+        $request = new Request('POST', 'https://api.docugenerate.com/'.$this->apiVerion.'/document', $headers);
+        $res = $client->sendAsync($request, $options)->wait();
+        return new DocugenerateResponsePostDocument( $res->getBody() );
     }
 
+    /**
+     * Génération et téléchargement du document dans le navigateur
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function download($name = null){
+        $doc = $this->generate($name);
+        Log::debug("Ecriture du document généré en local pour pourvoir le télécharger.");
+        Storage::disk('local')->put('/tmp/'.$doc->getFilename(), file_get_contents($doc->getDocUri()));
+        return response()->download( Storage::path('/tmp/'.$doc->getFilename()));
+    }
+
+    /**
+     * Représentation d'une objet DocuGerenate sous forme de string.
+     */
     public function __toString(): string
     {
-        return "DOCUGENERATE: \r\n\t apiKey => $this->apiKey";
+        return "DOCUGENERATE: \r\n\t".
+            "templateId => $this->templateId, outputName => $this->outputName\t , outputFormat => $this->outputFormat\r\n\t".
+            "singleFile => ".($this->singleFile ? "OUI" : "NON" ).", pageBreak => ".($this->pageBreak ? "OUI" : "NON" )."\t \r\n\t".
+            "data => " . json_encode($this->data)
+            ;
     }
 
 
