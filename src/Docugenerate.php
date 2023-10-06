@@ -34,8 +34,8 @@ class Docugenerate
         $this->templateId = $templateId;
     }
 
-    public function getTags(){
-        if( !$this->templateId ) throw new \Exception("Vous devez spécifier l'id du Template Docugenerate pour pouvoir récupérer ses champs.");
+    public function getTags() {
+        if(!$this->templateId) throw new \Exception("Vous devez spécifier l'id du Template Docugenerate pour pouvoir récupérer ses champs.");
         $client = new Client();
         $headers = [
             'Authorization' => $this->apiKey
