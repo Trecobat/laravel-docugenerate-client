@@ -15,7 +15,7 @@ class ComposerStaticInit71905b4cc7b41ad6f300cb5a946b0aa0
     public static $prefixLengthsPsr4 = array (
         'T' => 
         array (
-            'Trecobat\\LaravelDocugenerateClient\\' => 35,
+            'Trecobat\\LaravelDocuGenerateClient\\' => 35,
         ),
         'P' => 
         array (
@@ -31,7 +31,7 @@ class ComposerStaticInit71905b4cc7b41ad6f300cb5a946b0aa0
     );
 
     public static $prefixDirsPsr4 = array (
-        'Trecobat\\LaravelDocugenerateClient\\' => 
+        'Trecobat\\LaravelDocuGenerateClient\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),

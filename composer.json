@@ -1,15 +1,17 @@
 {
     "name": "trecobat/laravel-docugenerate-client",
-    "description": "Client to generate document whith the docugenerate API.",
-    "type": "library",
+    "description": "Client to generate document with the docugenerate API.",
     "autoload": {
         "psr-4": {
-            "Trecobat\\LaravelDocugenerateClient\\": "src/"
+            "Trecobat\\LaravelDocuGenerateClient\\": "src/"
         }
     },
-    "require": {
-        "guzzlehttp/guzzle": "^7.4",
-        "guzzlehttp/psr7": ">=1.8.5"
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Trecobat\\LaravelDocuGenerateClient\\src\\Providers\\"
+            ]
+        }
     },
     "authors": [
         {
@@ -17,5 +19,9 @@
             "email": "pierre-yves.desaulle@trecobat.fr"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "require": {
+        "guzzlehttp/guzzle": "^7.4",
+        "guzzlehttp/psr7": ">=1.8.5"
+    }
 }
