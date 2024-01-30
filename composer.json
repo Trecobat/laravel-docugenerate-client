@@ -3,13 +3,13 @@
     "description": "Client to generate document with the docugenerate API.",
     "autoload": {
         "psr-4": {
-            "Trecobat\\LaravelDocuGenerateClient\\": "src/"
+            "Trecobat\\LaravelDocugenerateClient\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Trecobat\\LaravelDocuGenerateClient\\src\\Providers\\"
+                "Trecobat\\LaravelDocugenerateClient\\src\\Providers\\"
             ]
         }
     },
