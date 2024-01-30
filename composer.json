@@ -6,13 +6,6 @@
             "Trecobat\\LaravelDocugenerateClient\\": "src/"
         }
     },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Trecobat\\LaravelDocugenerateClient\\src\\Providers\\"
-            ]
-        }
-    },
     "authors": [
         {
             "name": "Pierre-Yves",
